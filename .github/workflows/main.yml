@@ -5,6 +5,8 @@ on:
   push:
     branches: 
       - master
+    paths:
+      - 'configs/*.yml'
 
 jobs:
   master:
@@ -23,4 +25,5 @@ jobs:
         run: |
           echo "starting" && \
           echo "${DUMMY_SECRET}" && \
-          echo "finished"
+          ls configs/*.yml && \
+          echo "finished" 
