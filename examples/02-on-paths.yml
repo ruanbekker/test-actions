@@ -1,0 +1,29 @@
+# https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#example-including-paths
+# this will only trigger when files under configs/*.yml is pushed to master
+name: main
+on:
+  push:
+    branches: 
+      - master
+    paths:
+      - 'configs/*.yml'
+
+jobs:
+  master:
+    if: "!contains(github.event.head_commit.message, '[skip-ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: run a single line
+        run: echo "${DUMMY_SECRET}"
+        env:
+          DUMMY_SECRET: ${{ secrets.DUMMY_SECRET }}
+
+      - name: run a multi line
+        run: |
+          echo "starting" && \
+          echo "${DUMMY_SECRET}" && \
+          ls configs/*.yml && \
+          echo "finished" 
