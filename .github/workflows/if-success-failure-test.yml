@@ -1,0 +1,27 @@
+name: if-success-failure-test
+on:
+  push:
+    branches: 
+      - master
+    paths:
+      - 'test-scripts/test.*'
+
+jobs:
+  master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: run a multi line
+        run: |
+          val=$(sh test-scripts/test.sh)
+          if [ ${val} == 1 ]; then exit 0; else exit 1; fi
+      
+      - name: run on success
+        if: ${{ success() }}
+        run: echo "success"
+        
+      - name: run on failure
+        if: ${{ failure() }}
+        run: echo "failure"
