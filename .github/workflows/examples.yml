@@ -16,3 +16,12 @@ jobs:
 
       - name: run a single line
         run: echo "examples was modified"
+        
+      - name: run a hostname command
+        run: hostname
+        
+      - name: run a ls command
+        run: ls
+        
+      - name: run a ifconfig.co curl
+        run: curl ifconfig.co
