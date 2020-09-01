@@ -1,0 +1,31 @@
+name: slack-basic-notification
+on:
+  push:
+    branches: 
+      - master
+
+jobs:
+  master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: run a multi line
+        run: |
+          echo "starting"
+          echo "${GITHUB_RUN_ID}"
+          echo "finished"
+    
+      # https://github.com/marketplace/actions/github-action-for-slack
+      - name: Slack Notification
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: AlertManager
+          SLACK_CHANNEL: notifications
+          SLACK_AVATAR: repository # Optional. can be (repository, sender, an URL) (defaults to webhook app avatar)
+          # if custom payload is used, the args gets ignored
+          SLACK_CUSTOM_PAYLOAD: '{"text":"Custom payload from {{ GITHUB_REPOSITORY }} \\n *with* `new` _line_ escaped","username": "{{ GITHUB_ACTOR }}"}'
+        uses: Ilshidur/action-slack@master
+        with:
+          args: 'test message' # Optional
