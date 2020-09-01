@@ -1,0 +1,30 @@
+name: slack-detail-notifications
+on:
+  push:
+    branches: 
+      - master
+
+jobs:
+  master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: run a multi line
+        run: |
+          echo "starting"
+          echo "${GITHUB_RUN_ID}"
+          echo "finished"
+    
+      # https://github.com/marketplace/actions/slack-notify
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_CHANNEL: tech-builds-qa
+          SLACK_COLOR: '#3278BD'
+          SLACK_ICON: https://cdn.iconscout.com/icon/free/png-128/github-136-458293.png
+          SLACK_TITLE: GithubActions Message
+          SLACK_MESSAGE: 'There was a commit and a message was sent :this_is_fine:'
+          SLACK_USERNAME: github-actions
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
