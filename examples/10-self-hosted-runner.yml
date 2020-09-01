@@ -17,3 +17,7 @@ jobs:
       - name: run a single line
         run: echo "examples was modified"
 
+      # this will return the hostname of the server 
+      # where the runner is hosted on
+      - name: run a hostname command
+        run: hostname
