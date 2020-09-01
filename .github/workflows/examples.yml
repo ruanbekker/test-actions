@@ -20,8 +20,8 @@ jobs:
       - name: run a hostname command
         run: hostname
         
-      - name: run a ls command
-        run: ls
+      - name: run a docker ps command
+        run: docker ps
         
       - name: run a ifconfig.co curl
         run: curl ifconfig.co
