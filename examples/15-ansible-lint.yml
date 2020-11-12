@@ -1,0 +1,51 @@
+---
+# source:
+# - https://github.com/marketplace/actions/ansible-lint
+# - https://www.ansible.com/blog/ansible-linting-with-github-actions
+# - https://github.com/colin-mccarthy/ansible_lint_demo/blob/master/.github/workflows/ansible-lint.yml
+# - https://ansible-lint.readthedocs.io/en/latest/default_rules.html#trailing-whitespace
+# - https://medium.com/faun/linting-your-ansible-playbooks-and-make-a-continuous-integration-ci-solution-bcf8b4ea4c03
+
+name: Lint/Ansible
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Lint Ansible Playbooks
+      uses: ansible/ansible-lint-action@master
+      with:
+        targets: |
+          ansible/test.yml
+          ansible/test-2.yml
+        args: "-x 201,301,305" 
+        # - '201' Whitespaces
+        # - '301' Commands should not change things if nothing needs doing
+        # - '305' Use shell only when shell functionality is required
+
+    - name: Succeess Slack Notification
+      if: ${{ success() }}
+      uses: rtCamp/action-slack-notify@master
+      env:
+        SLACK_CHANNEL: notifications
+        SLACK_COLOR: '#32bd47'
+        SLACK_ICON: https://www.shareicon.net/data/256x256/2016/07/14/607550_black_4096x4096.png
+        SLACK_MESSAGE: 'Ansible Linting Completed :rocket:'
+        SLACK_TITLE: Message
+        SLACK_USERNAME: Github Actions
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          
+    - name: Failure Slack Notification
+      if: ${{ failure() }}
+      uses: rtCamp/action-slack-notify@master
+      env:
+        SLACK_CHANNEL: notifications
+        SLACK_COLOR: '#e31e1e'
+        SLACK_ICON: https://www.shareicon.net/data/256x256/2016/07/14/607550_black_4096x4096.png
+        SLACK_MESSAGE: 'Ansible Linting Failed :cry:'
+        SLACK_TITLE: Message
+        SLACK_USERNAME: Github Actions
+        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
