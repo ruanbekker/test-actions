@@ -1,0 +1,51 @@
+name: CI/Ansible
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  ansible:
+    runs-on: ubuntu-latest
+    container: ruanbekker/devopstools:latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: kubernetes-test.yml
+          directory: ./ansible
+          key: ${{secrets.SSH_PRIVATE_KEY}}
+          inventory: |
+            [tooling]
+            tooling-host ansible_host=${{secrets.TOOLING_SERVER_IP}} ansible_user=${{secrets.ANSIBLE_USER}}
+            [tooling:vars]
+            ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+          vault_password: ${{secrets.VAULT_PASSWORD}}
+          options: |
+            --limit tooling
+            --extra-vars ansible_user=${{secrets.ANSIBLE_USER}}
+          
+      - name: Succeess Slack Notification
+        if: ${{ success() }}
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_CHANNEL: notifications
+          SLACK_COLOR: '#3278BD'
+          SLACK_ICON: https://www.shareicon.net/data/256x256/2016/07/14/607550_black_4096x4096.png
+          SLACK_MESSAGE: 'CI Step: Ansible Deployment Completed :rocket:'
+          SLACK_TITLE: Message
+          SLACK_USERNAME: Github Actions
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          
+      - name: Failure Slack Notification
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_CHANNEL: notifications
+          SLACK_COLOR: '#3278BD'
+          SLACK_ICON: https://www.shareicon.net/data/256x256/2016/07/14/607550_black_4096x4096.png
+          SLACK_MESSAGE: 'CI Step: Ansible Deployment Failed :cry:'
+          SLACK_TITLE: Message
+          SLACK_USERNAME: Github Actions
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
