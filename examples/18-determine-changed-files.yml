@@ -1,0 +1,34 @@
+# note:
+# github actions responsibilities are:
+# - determine which projects changed from the monorepo structure
+# - expose the project names as envars: CHANGED_PROJECTS=one,two,three
+# - use --environment-variables-override <value> for codebuild so that codebuild can consume this data
+
+name: determine changed files
+
+on:
+  push:
+    branches: 
+      - master
+    paths:
+      - 'folder*/*'
+
+jobs:
+  runner:
+    name: Runner
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Determine Changed Projects
+      id: getfile
+      run: |
+          echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | xargs)"
+ 
+    - name: echo output
+      run: |
+          echo ${{ steps.getfile.outputs.files }}
