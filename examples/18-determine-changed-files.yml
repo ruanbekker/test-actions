@@ -24,11 +24,30 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Configure AWS Keys
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-1
+
     - name: Determine Changed Projects
       id: getfile
       run: |
           echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | xargs)"
- 
     - name: echo output
       run: |
           echo ${{ steps.getfile.outputs.files }}
+          echo $(for x in $(echo ${{ steps.getfile.outputs.files }} | tr ',' '\n'); do echo $x | cut -d '/' -f1 ; done) | tr ' ' ','
+          
+    - name: export changed files as env var
+      id: changedprjs
+      run: |
+          export files="${{ steps.getfile.outputs.files }}"
+          echo "::set-output name=changed_project_names::$(echo $(for x in $(echo ${{ steps.getfile.outputs.files }} | tr ',' '\n' | uniq); do echo $x | cut -d '/' -f1 ; done) | tr ' ' ',' | base64)"
+          echo ${{ steps.changedprjs.outputs.changed_project_names }}
+          # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-commands-for-github-actions
+          
+    - name: start codebuild with env var override
+      run: |
+          aws --region eu-west-1 codebuild start-build --project-name test-lambda-build --environment-variables-override name=CHANGED_PROJECTS,value=${{ steps.changedprjs.outputs.changed_project_names }},type=PLAINTEXT
